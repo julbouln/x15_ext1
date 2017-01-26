@@ -1,0 +1,15 @@
+Simple extension board for Beagleboard X15, eagle schematics and layout included.
+
+Main purpose is to add an LVDS interface through video out and SN75LVDS83B chip and some GPIO and stuff on hackable pin headers. It uses only P18 Beagleboard X15 port and measure 55.88x43.18mm.
+
+Pin headers includes : 
+- 2 3V3, 5V, 12V with GND pins, 
+- 8 single channel LVDS pins
+- X15 power off pin 
+- 14 GPIOS which should be used as I2C(1), SPI(1), PWM(2?) and UART(2?).
+
+Included my dts file (linux 4.9.4) for an AUO B156XW04 V5 screen (GPIO4_7 as EN, EHRPWM2B as backlight), as well as a ruby script to convert from EDID hex file to "panel-timing" node.
+
+Limitations and errata:
+- only 18 bits single channel LVDS screens are supported
+- LVDS positive pin 1 and LVDS positive pin 2 are inversed

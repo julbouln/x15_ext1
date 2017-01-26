@@ -1,0 +1,161 @@
+/*
+ * Copyright (C) 2014-2016 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include "am57xx-beagle-x15-common.dtsi"
+
+/ {
+	/* NOTE: This describes the "original" pre-production A2 revision */
+	model = "TI AM5728 BeagleBoard-X15";
+
+	aliases {
+		display0 = &lcd0;
+		display1 = &hdmi0;
+	};
+	
+
+	lcd0: display {
+		status = "okay";
+		compatible = "", "panel-dpi";
+		label = "lcd";
+	    pinctrl-names = "default";
+    	pinctrl-0 = <&lcd_pins>;
+
+		enable-gpios = <&gpio4 7 GPIO_ACTIVE_HIGH>;
+
+		panel-timing {
+			clock-frequency = <69300000>;
+			hactive = <1366>;
+			vactive = <768>;
+			hsync-len = <10>;
+			hfront-porch = <8>;
+			hback-porch = <78>;
+
+			vsync-len = <1>;
+			vfront-porch = <3>;
+			vback-porch = <18>;
+
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <0>;
+			/*syncclk-active = <0>;*/
+	};
+
+	port {
+		lcd_in: endpoint {
+		remote-endpoint = <&dpi_out>;
+	};
+  };
+};
+
+backlight {
+	status = "okay";
+	compatible = "pwm-backlight";
+	pwms = <&ehrpwm1 1 500000 0>;
+	pwm-names = "LCD";
+
+	/* Anything lower than 241 is no longer visible */
+	brightness-levels = <0 30 55 60 75 100 200 240 255>;
+	default-brightness-level = <8>;
+ };
+};
+
+&dss {
+	status = "ok";
+
+	vdda_video-supply = <&ldoln_reg>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&vout1_pins>;
+
+	ports {
+	    #address-cells = <1>;
+        #size-cells = <0>;
+
+		port {
+		reg = <0>;
+		dpi_out: endpoint {
+			remote-endpoint = <&lcd_in>;
+			data-lines = <18>;
+		};
+	   };
+	};
+};
+
+&epwmss1 {
+        status = "okay";
+};
+
+
+&ehrpwm1 {
+	status = "okay";
+};
+
+
+&tpd12s015 {
+	gpios = <&gpio7 10 GPIO_ACTIVE_HIGH>,	/* gpio7_10, CT CP HPD */
+		<&gpio6 28 GPIO_ACTIVE_HIGH>,	/* gpio6_28, LS OE */
+		<&gpio7 12 GPIO_ACTIVE_HIGH>;	/* gpio7_12/sp1_cs2, HPD */
+};
+
+&mmc1 {
+	vmmc-supply = <&ldo1_reg>;
+};
+
+/* errata i880 "Ethernet RGMII2 Limited to 10/100 Mbps" */
+&phy1 {
+	max-speed = <100>;
+};
+
+&dra7_pmx_core {
+
+	vout1_pins: pinmux_vout1_pins {
+		pinctrl-single,pins = <
+			0x1C8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_clk */
+			0x1CC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_de */
+			0x1D4	(PIN_OUTPUT | MUX_MODE0)	/* vout1_hsync */
+			0x1D8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_vsync */
+			0x1DC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d0 */
+			0x1E0	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d1 */
+			0x1E4	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d2 */
+			0x1E8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d3 */
+			0x1EC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d4 */
+			0x1F0	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d5 */
+			0x1F4	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d6 */
+			0x1F8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d7 */
+			0x1FC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d8 */
+			0x200	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d9 */
+			0x204	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d10 */
+			0x208	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d11 */
+			0x20C	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d12 */
+			0x210	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d13 */
+			0x214	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d14 */
+			0x218	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d15 */
+			0x21C	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d16 */
+			0x220	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d17 */
+			
+>;
+	};
+
+	vout2_pins: pinmux_vout2_pins {
+		pinctrl-single,pins = <
+			0x224	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d18 */
+			0x228	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d19 */
+			0x22C	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d20 */
+			0x230	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d21 */
+			0x234	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d22 */
+			0x238	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d23 */
+>;
+};
+lcd_pins: pinmux_lcd_pins {
+		pinctrl-single,pins = <
+			0x180 	(PIN_OUTPUT | MUX_MODE14)	/* gpio4_7 */
+		>;
+	};
+
+};
