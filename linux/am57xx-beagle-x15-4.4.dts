@@ -1,0 +1,259 @@
+/*
+ * Copyright (C) 2014-2016 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+#include "am57xx-beagle-x15-common.dtsi"
+#include "am57xx-commercial-grade.dtsi"
+#include "am57xx-cmem.dtsi"
+
+/ {
+	model = "TI AM5728 BeagleBoard-X15";
+
+	aliases {
+            rtc0 = &mcp_rtc;
+                rtc1 = &tps659038_rtc;
+        	rtc2 = &rtc;
+                
+		display0 = &lcd0;
+		display1 = &hdmi0;
+
+                sound0 = &sound0;
+        	sound1 = &hdmi;
+	};
+	
+	lcd0: display {
+		status = "okay";
+		compatible = "", "panel-dpi";
+		label = "lcd";
+	    	pinctrl-names = "default";
+	    	pinctrl-0 = <&lcd_pins>;
+
+		enable-gpios = <&gpio4 7 GPIO_ACTIVE_HIGH>;
+
+		panel-timing {
+			clock-frequency = <69300000>;
+			hactive = <1366>;
+			vactive = <768>;
+			hsync-len = <10>;
+			hfront-porch = <8>;
+			hback-porch = <78>;
+
+			vsync-len = <1>;
+			vfront-porch = <3>;
+			vback-porch = <18>;
+
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <1>;
+			/*syncclk-active = <0>;*/
+	};
+	
+	port {
+		lcd_in: endpoint {
+		remote-endpoint = <&dpi_out>;
+	};
+};
+};
+
+backlight {
+	status = "okay";
+	compatible = "pwm-backlight";
+	pwms = <&ehrpwm1 1 500000 0>;
+	pwm-names = "LCD";
+
+	/* Anything lower than 241 is no longer visible */
+	brightness-levels = <0 30 55 60 75 100 200 240 255>;
+	default-brightness-level = <8>;
+ };
+};
+
+&dss {
+	status = "ok";
+
+	vdda_video-supply = <&ldoln_reg>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&vout1_pins>;
+
+	ports {
+	    #address-cells = <1>;
+	    #size-cells = <0>;
+
+		port {
+		reg = <0>;
+		dpi_out: endpoint {
+			remote-endpoint = <&lcd_in>;
+			data-lines = <18>;
+		};
+	   };
+	};
+};
+
+&epwmss1 {
+        status = "okay";
+};
+
+
+&ehrpwm1 {
+	status = "okay";
+};
+
+&dra7_pmx_core {
+
+	mmc1_pins_hs: pinmux_mmc1_hs_pins {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3754, (PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)) /* mmc1_clk.clk */
+			DRA7XX_CORE_IOPAD(0x3758, (PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)) /* mmc1_cmd.cmd */
+			DRA7XX_CORE_IOPAD(0x375c, (PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)) /* mmc1_dat0.dat0 */
+			DRA7XX_CORE_IOPAD(0x3760, (PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)) /* mmc1_dat1.dat1 */
+			DRA7XX_CORE_IOPAD(0x3764, (PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)) /* mmc1_dat2.dat2 */
+			DRA7XX_CORE_IOPAD(0x3768, (PIN_INPUT_PULLUP | MUX_VIRTUAL_MODE11 | MUX_MODE0)) /* mmc1_dat3.dat3 */
+		>;
+	};
+
+	mmc2_pins_hs: mmc2_pins_hs {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x349c, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a23.mmc2_clk */
+			DRA7XX_CORE_IOPAD(0x34b0, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_cs1.mmc2_cmd */
+			DRA7XX_CORE_IOPAD(0x34a0, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a24.mmc2_dat0 */
+			DRA7XX_CORE_IOPAD(0x34a4, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a25.mmc2_dat1 */
+			DRA7XX_CORE_IOPAD(0x34a8, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a26.mmc2_dat2 */
+			DRA7XX_CORE_IOPAD(0x34ac, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a27.mmc2_dat3 */
+			DRA7XX_CORE_IOPAD(0x348c, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a19.mmc2_dat4 */
+			DRA7XX_CORE_IOPAD(0x3490, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a20.mmc2_dat5 */
+			DRA7XX_CORE_IOPAD(0x3494, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a21.mmc2_dat6 */
+			DRA7XX_CORE_IOPAD(0x3498, (PIN_INPUT_PULLUP | MUX_MODE1)) /* gpmc_a22.mmc2_dat7 */
+		>;
+	};
+
+	mmc2_pins_ddr_3_3v: pinmux_mmc2_ddr_3_3v_pins {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x349c, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a23.mmc2_clk */
+			DRA7XX_CORE_IOPAD(0x34b0, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_cs1.mmc2_cmd */
+			DRA7XX_CORE_IOPAD(0x34a0, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a24.mmc2_dat0 */
+			DRA7XX_CORE_IOPAD(0x34a4, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a25.mmc2_dat1 */
+			DRA7XX_CORE_IOPAD(0x34a8, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a26.mmc2_dat2 */
+			DRA7XX_CORE_IOPAD(0x34ac, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a27.mmc2_dat3 */
+			DRA7XX_CORE_IOPAD(0x348c, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a19.mmc2_dat4 */
+			DRA7XX_CORE_IOPAD(0x3490, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a20.mmc2_dat5 */
+			DRA7XX_CORE_IOPAD(0x3494, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a21.mmc2_dat6 */
+			DRA7XX_CORE_IOPAD(0x3498, (PIN_INPUT_PULLUP | MANUAL_MODE | MUX_MODE1)) /* gpmc_a22.mmc2_dat7 */
+		>;
+	};
+
+	vout1_pins: pinmux_vout1_pins {
+		pinctrl-single,pins = <
+			0x1C8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_clk */
+			0x1CC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_de */
+			0x1D4	(PIN_OUTPUT | MUX_MODE0)	/* vout1_hsync */
+			0x1D8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_vsync */
+			0x1DC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d0 */
+			0x1E0	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d1 */
+			0x1E4	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d2 */
+			0x1E8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d3 */
+			0x1EC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d4 */
+			0x1F0	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d5 */
+			0x1F4	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d6 */
+			0x1F8	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d7 */
+			0x1FC	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d8 */
+			0x200	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d9 */
+			0x204	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d10 */
+			0x208	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d11 */
+			0x20C	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d12 */
+			0x210	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d13 */
+			0x214	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d14 */
+			0x218	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d15 */
+			0x21C	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d16 */
+			0x220	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d17 */
+			
+>;
+	};
+
+	vout2_pins: pinmux_vout2_pins {
+		pinctrl-single,pins = <
+			0x224	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d18 */
+			0x228	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d19 */
+			0x22C	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d20 */
+			0x230	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d21 */
+			0x234	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d22 */
+			0x238	(PIN_OUTPUT | MUX_MODE0)	/* vout1_d23 */
+>;
+};
+lcd_pins: pinmux_lcd_pins {
+		pinctrl-single,pins = <
+			0x180 	(PIN_OUTPUT | MUX_MODE14)	/* gpio4_7 */
+		>;
+	};
+
+};
+
+&dra7_iodelay_core {
+	mmc2_iodelay_ddr_3_3v_conf: mmc2_iodelay_ddr_3_3v_conf {
+		pinctrl-single,pins = <
+			0x18c (A_DELAY(0) | G_DELAY(120))	/* CFG_GPMC_A19_IN */
+			0x190 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A19_OEN */
+			0x194 (A_DELAY(174) | G_DELAY(0))	/* CFG_GPMC_A19_OUT */
+			0x1a4 (A_DELAY(265) | G_DELAY(360))	/* CFG_GPMC_A20_IN */
+			0x1a8 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A20_OEN */
+			0x1ac (A_DELAY(168) | G_DELAY(0))	/* CFG_GPMC_A20_OUT */
+			0x1b0 (A_DELAY(0) | G_DELAY(120))	/* CFG_GPMC_A21_IN */
+			0x1b4 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A21_OEN */
+			0x1b8 (A_DELAY(136) | G_DELAY(0))	/* CFG_GPMC_A21_OUT */
+			0x1bc (A_DELAY(0) | G_DELAY(120))	/* CFG_GPMC_A22_IN */
+			0x1c0 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A22_OEN */
+			0x1c4 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A22_OUT */
+			0x1c8 (A_DELAY(287) | G_DELAY(420))	/* CFG_GPMC_A23_IN */
+			0x1d0 (A_DELAY(879) | G_DELAY(0))	/* CFG_GPMC_A23_OUT */
+			0x1d4 (A_DELAY(144) | G_DELAY(240))	/* CFG_GPMC_A24_IN */
+			0x1d8 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A24_OEN */
+			0x1dc (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A24_OUT */
+			0x1e0 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A25_IN */
+			0x1e4 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A25_OEN */
+			0x1e8 (A_DELAY(34) | G_DELAY(0))	/* CFG_GPMC_A25_OUT */
+			0x1ec (A_DELAY(0) | G_DELAY(120))	/* CFG_GPMC_A26_IN */
+			0x1f0 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A26_OEN */
+			0x1f4 (A_DELAY(120) | G_DELAY(0))	/* CFG_GPMC_A26_OUT */
+			0x1f8 (A_DELAY(120) | G_DELAY(180))	/* CFG_GPMC_A27_IN */
+			0x1fc (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A27_OEN */
+			0x200 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_A27_OUT */
+			0x360 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_CS1_IN */
+			0x364 (A_DELAY(0) | G_DELAY(0))		/* CFG_GPMC_CS1_OEN */
+			0x368 (A_DELAY(11) | G_DELAY(0))	/* CFG_GPMC_CS1_OUT */
+		>;
+	};
+};
+
+&tpd12s015 {
+	gpios = <&gpio7 10 GPIO_ACTIVE_HIGH>,	/* gpio7_10, CT CP HPD */
+		<&gpio6 28 GPIO_ACTIVE_HIGH>,	/* gpio6_28, LS OE */
+		<&gpio7 12 GPIO_ACTIVE_HIGH>;	/* gpio7_12/sp1_cs2, HPD */
+};
+
+&mmc1 {
+	pinctrl-names = "default", "hs";
+	pinctrl-0 = <&mmc1_pins_default>;
+	pinctrl-1 = <&mmc1_pins_hs>;
+
+	vmmc-supply = <&ldo1_reg>;
+	max-frequency = <96000000>;
+	/delete-property/ sd-uhs-sdr104;
+	/delete-property/ sd-uhs-sdr50;
+	/delete-property/ sd-uhs-ddr50;
+	/delete-property/ sd-uhs-sdr25;
+	/delete-property/ sd-uhs-sdr12;
+};
+
+&mmc2 {
+	pinctrl-names = "default", "hs", "ddr_1_8v";
+	pinctrl-0 = <&mmc2_pins_default>;
+	pinctrl-1 = <&mmc2_pins_hs>;
+	pinctrl-2 = <&mmc2_pins_ddr_3_3v &mmc2_iodelay_ddr_3_3v_conf>;
+
+	max-frequency = <96000000>;
+	no-1-8-v;
+	/delete-property/ mmc-hs200-1_8v;
+};

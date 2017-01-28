@@ -8,7 +8,19 @@ Pin headers includes :
 - X15 power off pin 
 - 14 GPIOS which should be used as I2C(1), SPI(1), PWM(2?) and UART(2?).
 
-Included my dts file (linux 4.9.4) for an AUO B156XW04 V5 screen (GPIO4_7 as EN, EHRPWM2B as backlight), as well as a ruby script to convert from EDID hex file to "panel-timing" node.
+Included my DTS files (tested on linux 4.9.4 and 4.4.44) for an AUO B156XW04 V5 screen (GPIO4_7 as EN, EHRPWM2B as backlight), as well as a ruby script to convert from EDID hex file to "panel-timing" node.
+
+To recompile DTB :
+$ git clone https://github.com/RobertCNelson/dtb-rebuilder
+$ cd dtb-rebuilder
+$ cp ../x15_ext1/linux/am57xx-beagle-x15.dts src/arm
+$ make src/arm/am57xx-beagle-x15.dtb
+
+Unfortunately for 1366 width display, kernel need to be modified and recompiled.
+Edit drivers/gpu/drm/omapdrm/dss/dpi.c then comment theses lines :
+//   if (timings->x_res % 8 != 0)
+//	return -EINVAL;
+Not sure why there is this restriction since it seems to work without it.
 
 Limitations and errata:
 - only 18 bits single channel LVDS screens are supported
